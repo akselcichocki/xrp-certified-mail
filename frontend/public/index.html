@@ -451,9 +451,19 @@
             <p>Blockchain-verified email proof</p>
         </header>
 
+        <!-- Quantum Status Banner -->
+        <div style="background:rgba(248,113,113,.06);border:1px solid rgba(127,29,29,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:20px;flex-shrink:0;margin-top:2px">&#9888;</div>
+            <div>
+                <div style="font-size:12px;font-weight:600;color:#fca5a5;margin-bottom:4px">Quantum Vulnerability Detected</div>
+                <div style="font-size:11px;color:#71717a;line-height:1.6">This tool's content proofs (SHA-256) are quantum-resistant, but the XRP transaction signatures (ECDSA secp256k1) are vulnerable to Shor's Algorithm. <a href="#" onclick="showTab('quantum');return false" style="color:#f87171;text-decoration:none">Learn more &rarr;</a></div>
+            </div>
+        </div>
+
         <div class="tabs">
             <button class="tab active" data-tab="certify">Certify</button>
             <button class="tab" data-tab="verify">Verify</button>
+            <button class="tab" data-tab="quantum" style="color:#f87171">Quantum</button>
             <button class="tab" data-tab="about">About</button>
         </div>
 
@@ -613,6 +623,104 @@
             </div>
         </div>
 
+        <!-- Quantum Security Panel -->
+        <div id="quantum" class="panel">
+            <!-- Threat Assessment -->
+            <div class="card" style="border-color:rgba(127,29,29,.3)">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+                    <span style="font-size:20px">&#9888;</span>
+                    <div style="font-size:14px;font-weight:600;color:#fca5a5">Quantum Security Assessment</div>
+                </div>
+                <p style="color:#a1a1aa;font-size:12px;line-height:1.7;margin-bottom:16px">This tool demonstrates a real-world quantum vulnerability. The same cryptographic weakness that threatens Bitcoin transaction signing also affects XRP Certified Mail — and every blockchain system built on elliptic curve cryptography.</p>
+
+                <!-- Status Grid -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                    <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:14px 16px">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.4)"></div>
+                            <span style="font-size:10px;color:#22c55e;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Quantum Safe</span>
+                        </div>
+                        <div style="font-size:13px;color:#fafafa;font-weight:500;margin-bottom:4px">Content Proofs (SHA-256)</div>
+                        <div style="font-size:10px;color:#52525b;line-height:1.6">Grover's Algorithm provides only a quadratic speedup (2<sup>256</sup> → 2<sup>128</sup>). Your email content hashes remain trustworthy in a post-quantum world.</div>
+                    </div>
+                    <div style="background:rgba(248,113,113,.06);border:1px solid rgba(127,29,29,.3);border-radius:8px;padding:14px 16px">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                            <div style="width:8px;height:8px;border-radius:50%;background:#f87171;box-shadow:0 0 8px rgba(248,113,113,.4)"></div>
+                            <span style="font-size:10px;color:#f87171;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Vulnerable</span>
+                        </div>
+                        <div style="font-size:13px;color:#fafafa;font-weight:500;margin-bottom:4px">Transaction Signatures (ECDSA)</div>
+                        <div style="font-size:10px;color:#52525b;line-height:1.6">Shor's Algorithm breaks elliptic curve discrete logarithms in polynomial time. XRP's secp256k1 signing keys could be derived by a sufficiently powerful quantum computer.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What This Means -->
+            <div class="card">
+                <h3 style="color:#fafafa;font-size:14px;margin-bottom:12px">What This Means in Practice</h3>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                        <span style="font-size:10px;color:#09090b;background:#22c55e;border-radius:4px;padding:2px 8px;font-weight:600;flex-shrink:0;margin-top:2px">SAFE</span>
+                        <div style="font-size:11px;color:#a1a1aa;line-height:1.6"><strong style="color:#d4d4d8">The proof of what the email said</strong> — SHA-256 hashes survive quantum attacks. You can still prove the exact content, recipient, and timestamp.</div>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                        <span style="font-size:10px;color:#09090b;background:#f87171;border-radius:4px;padding:2px 8px;font-weight:600;flex-shrink:0;margin-top:2px">AT RISK</span>
+                        <div style="font-size:11px;color:#a1a1aa;line-height:1.6"><strong style="color:#d4d4d8">The proof that YOU sent it</strong> — ECDSA signatures could be forged. Someone with a quantum computer could create fake transactions that appear to come from your account.</div>
+                    </div>
+                    <div style="display:flex;gap:12px;align-items:flex-start">
+                        <span style="font-size:10px;color:#09090b;background:#facc15;border-radius:4px;padding:2px 8px;font-weight:600;flex-shrink:0;margin-top:2px">WATCH</span>
+                        <div style="font-size:11px;color:#a1a1aa;line-height:1.6"><strong style="color:#d4d4d8">The ledger's integrity itself</strong> — if signing keys can be forged, the trust model of the entire ledger changes. This affects every blockchain using ECDSA.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Bigger Picture -->
+            <div class="card">
+                <h3 style="color:#fafafa;font-size:14px;margin-bottom:12px">The Bigger Picture</h3>
+                <p style="font-size:11px;color:#a1a1aa;line-height:1.7;margin-bottom:12px">This is not a theoretical problem limited to certified mail. The same ECDSA vulnerability affects:</p>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
+                    <div style="background:rgba(9,9,11,.5);border:1px solid rgba(26,26,30,.5);border-radius:6px;padding:10px 12px;text-align:center">
+                        <div style="font-size:16px;margin-bottom:4px">&#8383;</div>
+                        <div style="font-size:10px;color:#71717a">Bitcoin</div>
+                    </div>
+                    <div style="background:rgba(9,9,11,.5);border:1px solid rgba(26,26,30,.5);border-radius:6px;padding:10px 12px;text-align:center">
+                        <div style="font-size:16px;margin-bottom:4px">&#9830;</div>
+                        <div style="font-size:10px;color:#71717a">Ethereum</div>
+                    </div>
+                    <div style="background:rgba(9,9,11,.5);border:1px solid rgba(26,26,30,.5);border-radius:6px;padding:10px 12px;text-align:center">
+                        <div style="font-size:16px;margin-bottom:4px">&#10005;</div>
+                        <div style="font-size:10px;color:#71717a">XRP Ledger</div>
+                    </div>
+                    <div style="background:rgba(9,9,11,.5);border:1px solid rgba(26,26,30,.5);border-radius:6px;padding:10px 12px;text-align:center">
+                        <div style="font-size:16px;margin-bottom:4px">&#128274;</div>
+                        <div style="font-size:10px;color:#71717a">All ECDSA chains</div>
+                    </div>
+                </div>
+                <p style="font-size:11px;color:#71717a;line-height:1.7">I built this tool to demonstrate a practical use case — and then discovered it has the exact quantum vulnerability my research lab studies. That's the point: post-quantum risk isn't abstract. It shows up in real tools people build today.</p>
+            </div>
+
+            <!-- What To Do -->
+            <div class="card">
+                <h3 style="color:#fafafa;font-size:14px;margin-bottom:12px">What Can Be Done</h3>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="font-size:11px;color:#a1a1aa;line-height:1.6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#22c55e">&#9654;</span><strong style="color:#d4d4d8">Hybrid signatures</strong> — combine ECDSA with a post-quantum algorithm (ML-DSA) so the proof survives even if one scheme breaks</div>
+                    <div style="font-size:11px;color:#a1a1aa;line-height:1.6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#22c55e">&#9654;</span><strong style="color:#d4d4d8">Hash-based commitments</strong> — anchor the SHA-256 proof independently of the transaction signature</div>
+                    <div style="font-size:11px;color:#a1a1aa;line-height:1.6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#22c55e">&#9654;</span><strong style="color:#d4d4d8">Ledger-level PQC migration</strong> — wait for XRP (and other chains) to adopt post-quantum signature schemes</div>
+                    <div style="font-size:11px;color:#a1a1aa;line-height:1.6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:#22c55e">&#9654;</span><strong style="color:#d4d4d8">Crypto-agility</strong> — design systems that can swap signature algorithms without rebuilding</div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="card" style="text-align:center;border-color:rgba(34,197,94,.15)">
+                <div style="font-size:13px;color:#fafafa;font-weight:500;margin-bottom:8px">Explore the Research</div>
+                <p style="font-size:11px;color:#52525b;margin-bottom:16px">This quantum analysis is part of the Quantum Security Lab — an independent research project focused on post-quantum migration for digital assets.</p>
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                    <a href="https://p11.akselcichocki.com" target="_blank" rel="noopener" style="font-size:11px;color:#09090b;background:#22c55e;border-radius:6px;padding:8px 16px;text-decoration:none;font-weight:500">Quantum Security Lab</a>
+                    <a href="https://p11.akselcichocki.com/tester" target="_blank" rel="noopener" style="font-size:11px;color:#a1a1aa;border:1px solid #27272a;border-radius:6px;padding:8px 16px;text-decoration:none">Bitcoin Exposure Tester</a>
+                    <a href="https://p11.akselcichocki.com/bitcoin" target="_blank" rel="noopener" style="font-size:11px;color:#a1a1aa;border:1px solid #27272a;border-radius:6px;padding:8px 16px;text-decoration:none">Bitcoin Guide</a>
+                </div>
+            </div>
+        </div>
+
         <!-- About Panel -->
         <div id="about" class="panel">
             <div class="card about">
@@ -627,13 +735,9 @@
                 <h3>Why XRP?</h3>
                 <p>Transactions settle in 3-5 seconds and cost fractions of a cent (typically 10-12 drops, or ~$0.00001). No mining, no waiting, no significant cost.</p>
 
-                <h3>Quantum Security</h3>
-                <p>SHA-256 content hashes are considered quantum-resistant. ECDSA signing keys used by XRP are theoretically vulnerable to Shor's algorithm on a sufficiently powerful quantum computer, but no such computer currently exists. The XRP Ledger community is exploring post-quantum signature schemes.</p>
-
-                <p>For more on post-quantum security research, visit the <a href="https://p11.akselcichocki.com" target="_blank" rel="noopener">Quantum Security Lab</a>.</p>
-
                 <h3>Open Source</h3>
-                <p>This project is MIT licensed. Built with FastAPI, xrpl-py, and the XRP Testnet.</p>
+                <p>This project is MIT licensed and available on <a href="https://github.com/akselcichocki/xrp-certified-mail" target="_blank" rel="noopener" style="color:#22c55e">GitHub</a>. Built with FastAPI, xrpl-py, and the XRP Testnet.</p>
+                <p style="margin-top:8px">For quantum security research, see the <a href="https://p11.akselcichocki.com" target="_blank" rel="noopener" style="color:#22c55e">Quantum Security Lab</a>.</p>
             </div>
         </div>
 
@@ -648,13 +752,15 @@
             : '';
 
         // Tab switching
+        function showTab(name) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.querySelector('[data-tab="' + name + '"]').classList.add('active');
+        }
+
         document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.tab).classList.add('active');
-            });
+            tab.addEventListener('click', () => showTab(tab.dataset.tab));
         });
 
         // Copy to clipboard

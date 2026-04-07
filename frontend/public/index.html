@@ -452,11 +452,14 @@
         </header>
 
         <!-- Quantum Status Banner -->
-        <div style="background:rgba(248,113,113,.06);border:1px solid rgba(127,29,29,.3);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
-            <div style="font-size:20px;flex-shrink:0;margin-top:2px">&#9888;</div>
+        <div style="background:linear-gradient(135deg, rgba(248,113,113,.04), rgba(34,197,94,.04));border:1px solid rgba(39,39,42,.4);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:20px;flex-shrink:0;margin-top:2px">&#128737;</div>
             <div>
-                <div style="font-size:12px;font-weight:600;color:#fca5a5;margin-bottom:4px">Quantum Vulnerability Detected</div>
-                <div style="font-size:11px;color:#71717a;line-height:1.6">This tool's content proofs (SHA-256) are quantum-resistant, but the XRP transaction signatures (ECDSA secp256k1) are vulnerable to Shor's Algorithm. <a href="#" onclick="showTab('quantum');return false" style="color:#f87171;text-decoration:none">Learn more &rarr;</a></div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+                    <span style="font-size:10px;color:#f87171;border:1px solid rgba(127,29,29,.3);border-radius:4px;padding:2px 8px;text-transform:uppercase;letter-spacing:.06em">ECDSA Vulnerable</span>
+                    <span style="font-size:10px;color:#22c55e;border:1px solid rgba(34,197,94,.2);border-radius:4px;padding:2px 8px;text-transform:uppercase;letter-spacing:.06em">Quantum Shield Active</span>
+                </div>
+                <div style="font-size:11px;color:#a1a1aa;line-height:1.6">XRP transaction signatures are Shor-vulnerable, but this tool's <strong style="color:#22c55e">Quantum Shield</strong> provides a hash-chain proof layer that remains valid even after ECDSA is compromised. <a href="#" onclick="showTab('quantum');return false" style="color:#22c55e;text-decoration:none">See how it works &rarr;</a></div>
             </div>
         </div>
 

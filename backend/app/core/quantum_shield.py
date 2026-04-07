@@ -18,7 +18,7 @@ How it works:
   3. The shield hash is deterministic and verifiable by anyone who has
      the original content + the shield parameters
   4. Even if the XRP transaction signature is forged, the shield
-     independently proves the content existed at the claimed time
+     creates a server-side tamper-evident record of the content
 
 What this does NOT do:
   - It does not replace the XRP ledger proof (that still works today)
@@ -26,8 +26,8 @@ What this does NOT do:
   - It does not prove WHO sent it (that requires PQC signatures)
 
 What it DOES do:
-  - Proves WHAT was sent (content hash — quantum safe)
-  - Proves WHEN it was claimed (timestamp in the hash chain)
+  - Records WHAT was sent (content hash — quantum safe)
+  - Records the claimed certification time (timestamp in the hash chain)
   - Survives ECDSA compromise (no elliptic curve math involved)
   - Creates a standalone verifiable certificate
 
@@ -93,11 +93,13 @@ def generate_shield(
       layer_2 = SHA-256(layer_1 + "quantum-shield-v1")
       shield_hash = HMAC-SHA256(layer_2, secret=SHIELD_SECRET)
 
+    The shield hash binds the content, timestamp, and a random nonce into a server-verifiable record.
+
     This construction ensures:
-      - The proof is bound to the content (content_hash)
-      - The proof is bound to the time (timestamp)
-      - The proof is unique (nonce)
-      - The proof can be verified by the server (HMAC)
+      - The record is bound to the content (content_hash)
+      - The record is bound to the time (timestamp)
+      - The record is unique (nonce)
+      - The record can be verified by the server (HMAC)
       - No elliptic curve cryptography is involved
     """
     nonce = os.urandom(16).hex()

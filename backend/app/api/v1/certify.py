@@ -19,7 +19,10 @@ from xrpl.wallet import Wallet
 from app.core.config import settings
 from app.core.quantum_shield import generate_shield, verify_shield, certificate_to_dict
 
-_SHIELD_SECRET_BYTES = os.environ.get("QUANTUM_SHIELD_SECRET", "dev-salt").encode()
+_SHIELD_SECRET_RAW = os.environ.get("QUANTUM_SHIELD_SECRET", "")
+if not _SHIELD_SECRET_RAW and os.environ.get("ENVIRONMENT", "dev").lower() in ("prod", "production", "staging"):
+    raise RuntimeError("QUANTUM_SHIELD_SECRET is required in production for recipient hashing.")
+_SHIELD_SECRET_BYTES = (_SHIELD_SECRET_RAW or f"dev-only-{os.getpid()}").encode()
 
 logger = structlog.get_logger()
 router = APIRouter()

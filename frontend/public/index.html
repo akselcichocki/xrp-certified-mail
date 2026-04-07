@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Blockchain-verified email proof system using the XRP Ledger. Certify emails with tamper-proof receipts for less than a penny.">
+    <title>XRP Certified Mail — Blockchain-Verified Email Proof</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #050505;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(34, 197, 94, 0.4);
+            --text: #e4e4e7;
+            --text-muted: #71717a;
+            --green: #22c55e;
+            --green-dim: rgba(34, 197, 94, 0.15);
+            --red: #ef4444;
+            --red-dim: rgba(239, 68, 68, 0.15);
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 640px;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 48px 0 32px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+
+        header h1 span {
+            color: var(--green);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text);
+            background: var(--surface-hover);
+        }
+
+        .tab.active {
+            color: var(--green);
+            background: var(--green-dim);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .card + .card {
+            margin-top: 16px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        /* Forms */
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--green);
+            color: #050505;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #16a34a;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            color: var(--green);
+            border-color: var(--border-focus);
+        }
+
+        /* Result */
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.visible {
+            display: block;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        .result-value {
+            font-size: 12px;
+            color: var(--text);
+            word-break: break-all;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-value a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        .result-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* Status */
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-right: 6px;
+        }
+
+        .status-dot.error {
+            background: var(--red);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .status-badge.success {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .status-badge.error {
+            background: var(--red-dim);
+            color: var(--red);
+        }
+
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error-msg {
+            background: var(--red-dim);
+            color: var(--red);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error-msg.visible {
+            display: block;
+        }
+
+        /* Tab panels */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* About */
+        .about h3 {
+            font-size: 14px;
+            color: var(--text);
+            margin: 20px 0 8px;
+        }
+
+        .about h3:first-child {
+            margin-top: 0;
+        }
+
+        .about p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .about a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        .about a:hover {
+            text-decoration: underline;
+        }
+
+        .about ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .about ul li {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 4px 0;
+        }
+
+        .about ul li::before {
+            content: ">";
+            color: var(--green);
+            margin-right: 8px;
+        }
+
+        /* Wallet section */
+        .wallet-bar {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .wallet-result {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .wallet-result.visible {
+            display: block;
+        }
+
+        .wallet-warning {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 32px 0;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            header { padding: 32px 0 24px; }
+            header h1 { font-size: 20px; }
+            .card { padding: 16px; }
+            .result-row { flex-direction: column; gap: 4px; }
+            .result-value { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>XRP <span>Certified Mail</span></h1>
+            <p>Blockchain-verified email proof</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="certify">Certify</button>
+            <button class="tab" data-tab="verify">Verify</button>
+            <button class="tab" data-tab="about">About</button>
+        </div>
+
+        <!-- Certify Panel -->
+        <div id="certify" class="panel active">
+            <div class="card">
+                <div class="card-title">Certify Email</div>
+                <form id="certify-form">
+                    <div class="field">
+                        <label>To</label>
+                        <input type="email" id="cert-to" placeholder="recipient@example.com" required>
+                    </div>
+                    <div class="field">
+                        <label>Subject</label>
+                        <input type="text" id="cert-subject" placeholder="Important Document" required>
+                    </div>
+                    <div class="field">
+                        <label>Body</label>
+                        <textarea id="cert-body" placeholder="Email content to certify..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="certify-btn">
+                        Certify on XRP Ledger
+                    </button>
+                </form>
+
+                <div id="certify-error" class="error-msg"></div>
+
+                <div id="certify-result" class="result">
+                    <div class="card" style="margin-top: 16px;">
+                        <div class="card-title">
+                            <span class="status-dot"></span> Certified Receipt
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">TX Hash</span>
+                            <span class="result-value">
+                                <span id="res-tx-hash"></span>
+                                <button class="btn-copy" onclick="copyText('res-tx-hash')">copy</button>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Content Hash</span>
+                            <span class="result-value">
+                                <span id="res-content-hash"></span>
+                                <button class="btn-copy" onclick="copyText('res-content-hash')">copy</button>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Timestamp</span>
+                            <span class="result-value" id="res-timestamp"></span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Explorer</span>
+                            <span class="result-value">
+                                <a id="res-explorer" href="#" target="_blank" rel="noopener">View on XRPL Testnet</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wallet-bar">
+                <button class="btn btn-secondary btn-small" id="wallet-btn" onclick="generateWallet()">
+                    Generate Test Wallet
+                </button>
+                <div id="wallet-result" class="wallet-result">
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="status-dot"></span> Testnet Wallet
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Address</span>
+                            <span class="result-value">
+                                <span id="wallet-address"></span>
+                                <button class="btn-copy" onclick="copyText('wallet-address')">copy</button>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Seed</span>
+                            <span class="result-value">
+                                <span id="wallet-seed"></span>
+                                <button class="btn-copy" onclick="copyText('wallet-seed')">copy</button>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Balance</span>
+                            <span class="result-value" id="wallet-balance"></span>
+                        </div>
+                        <p class="wallet-warning">Testnet only. Do not use for real funds.</p>
+                    </div>
+                </div>
+                <div id="wallet-error" class="error-msg"></div>
+            </div>
+        </div>
+
+        <!-- Verify Panel -->
+        <div id="verify" class="panel">
+            <div class="card">
+                <div class="card-title">Verify Receipt</div>
+                <form id="verify-form">
+                    <div class="field">
+                        <label>Transaction Hash</label>
+                        <input type="text" id="verify-hash" placeholder="Enter XRP transaction hash" required>
+                    </div>
+                    <div class="field">
+                        <label>Original To (optional)</label>
+                        <input type="email" id="verify-to" placeholder="recipient@example.com">
+                    </div>
+                    <div class="field">
+                        <label>Original Subject (optional)</label>
+                        <input type="text" id="verify-subject" placeholder="Original subject line">
+                    </div>
+                    <div class="field">
+                        <label>Original Body (optional)</label>
+                        <textarea id="verify-body" placeholder="Original email body for comparison..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="verify-btn">
+                        Verify Receipt
+                    </button>
+                </form>
+
+                <div id="verify-error" class="error-msg"></div>
+
+                <div id="verify-result" class="result">
+                    <div class="card" style="margin-top: 16px;">
+                        <div class="card-title" id="verify-status-title">
+                            Verification Result
+                        </div>
+                        <div id="verify-status-badge" style="margin-bottom: 12px;"></div>
+                        <div class="result-row">
+                            <span class="result-label">TX Hash</span>
+                            <span class="result-value">
+                                <span id="vres-tx-hash"></span>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Content Hash</span>
+                            <span class="result-value">
+                                <span id="vres-content-hash"></span>
+                            </span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Timestamp</span>
+                            <span class="result-value" id="vres-timestamp"></span>
+                        </div>
+                        <div id="vres-match-row" class="result-row" style="display: none;">
+                            <span class="result-label">Content Match</span>
+                            <span class="result-value" id="vres-match"></span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Explorer</span>
+                            <span class="result-value">
+                                <a id="vres-explorer" href="#" target="_blank" rel="noopener">View on XRPL Testnet</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Panel -->
+        <div id="about" class="panel">
+            <div class="card about">
+                <h3>How It Works</h3>
+                <ul>
+                    <li>Email content is hashed with SHA-256</li>
+                    <li>The hash is written to an XRP Ledger transaction memo</li>
+                    <li>The transaction hash becomes your certified receipt</li>
+                    <li>Anyone can verify by looking up the transaction on the public ledger</li>
+                </ul>
+
+                <h3>Why XRP?</h3>
+                <p>Transactions settle in 3-5 seconds and cost fractions of a cent (typically 10-12 drops, or ~$0.00001). No mining, no waiting, no significant cost.</p>
+
+                <h3>Quantum Security</h3>
+                <p>SHA-256 content hashes are considered quantum-resistant. ECDSA signing keys used by XRP are theoretically vulnerable to Shor's algorithm on a sufficiently powerful quantum computer, but no such computer currently exists. The XRP Ledger community is exploring post-quantum signature schemes.</p>
+
+                <p>For more on post-quantum security research, visit the <a href="https://p11.akselcichocki.com" target="_blank" rel="noopener">Quantum Security Lab</a>.</p>
+
+                <h3>Open Source</h3>
+                <p>This project is MIT licensed. Built with FastAPI, xrpl-py, and the XRP Testnet.</p>
+            </div>
+        </div>
+
+        <footer>
+            Built by Aksel Cichocki &middot; <a href="https://p11.akselcichocki.com" target="_blank" rel="noopener">Quantum Security Lab</a>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = window.location.port === '3000' || window.location.port === '3001'
+            ? `${window.location.protocol}//${window.location.hostname}:8001`
+            : '';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Copy to clipboard
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                btn.textContent = 'copied';
+                setTimeout(() => { btn.textContent = 'copy'; }, 1500);
+            });
+        }
+
+        // Show error
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.classList.add('visible');
+            setTimeout(() => el.classList.remove('visible'), 8000);
+        }
+
+        // Certify
+        document.getElementById('certify-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('certify-btn');
+            const errorEl = document.getElementById('certify-error');
+            const resultEl = document.getElementById('certify-result');
+
+            errorEl.classList.remove('visible');
+            resultEl.classList.remove('visible');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Certifying...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/certify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to: document.getElementById('cert-to').value,
+                        subject: document.getElementById('cert-subject').value,
+                        body: document.getElementById('cert-body').value
+                    })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Request failed' }));
+                    throw new Error(err.detail || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                document.getElementById('res-tx-hash').textContent = data.transaction_hash;
+                document.getElementById('res-content-hash').textContent = data.content_hash;
+                document.getElementById('res-timestamp').textContent = data.timestamp || new Date().toISOString();
+                const explorerUrl = `https://testnet.xrpl.org/transactions/${data.transaction_hash}`;
+                document.getElementById('res-explorer').href = explorerUrl;
+                resultEl.classList.add('visible');
+            } catch (err) {
+                showError('certify-error', err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Certify on XRP Ledger';
+            }
+        });
+
+        // Verify
+        document.getElementById('verify-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('verify-btn');
+            const errorEl = document.getElementById('verify-error');
+            const resultEl = document.getElementById('verify-result');
+
+            errorEl.classList.remove('visible');
+            resultEl.classList.remove('visible');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Verifying...';
+
+            try {
+                const body = {
+                    transaction_hash: document.getElementById('verify-hash').value
+                };
+
+                const to = document.getElementById('verify-to').value;
+                const subject = document.getElementById('verify-subject').value;
+                const emailBody = document.getElementById('verify-body').value;
+
+                if (to || subject || emailBody) {
+                    body.original_content = {};
+                    if (to) body.original_content.to = to;
+                    if (subject) body.original_content.subject = subject;
+                    if (emailBody) body.original_content.body = emailBody;
+                }
+
+                const res = await fetch(`${API_BASE}/api/v1/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Request failed' }));
+                    throw new Error(err.detail || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                document.getElementById('vres-tx-hash').textContent = data.transaction_hash || body.transaction_hash;
+                document.getElementById('vres-content-hash').textContent = data.content_hash || 'N/A';
+                document.getElementById('vres-timestamp').textContent = data.timestamp || 'N/A';
+
+                const explorerUrl = `https://testnet.xrpl.org/transactions/${data.transaction_hash || body.transaction_hash}`;
+                document.getElementById('vres-explorer').href = explorerUrl;
+
+                const statusBadge = document.getElementById('verify-status-badge');
+                const statusTitle = document.getElementById('verify-status-title');
+
+                if (data.verified !== undefined) {
+                    if (data.verified) {
+                        statusBadge.innerHTML = '<span class="status-badge success"><span class="status-dot"></span> Verified</span>';
+                        statusTitle.innerHTML = '<span class="status-dot"></span> Verification Result';
+                    } else {
+                        statusBadge.innerHTML = '<span class="status-badge error"><span class="status-dot error"></span> Mismatch</span>';
+                        statusTitle.innerHTML = '<span class="status-dot error"></span> Verification Result';
+                    }
+                } else {
+                    statusBadge.innerHTML = '<span class="status-badge success"><span class="status-dot"></span> Transaction Found</span>';
+                    statusTitle.innerHTML = '<span class="status-dot"></span> Verification Result';
+                }
+
+                const matchRow = document.getElementById('vres-match-row');
+                if (data.content_match !== undefined) {
+                    matchRow.style.display = 'flex';
+                    document.getElementById('vres-match').innerHTML = data.content_match
+                        ? '<span class="status-badge success">Match</span>'
+                        : '<span class="status-badge error">No Match</span>';
+                } else {
+                    matchRow.style.display = 'none';
+                }
+
+                resultEl.classList.add('visible');
+            } catch (err) {
+                showError('verify-error', err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Verify Receipt';
+            }
+        });
+
+        // Generate test wallet
+        async function generateWallet() {
+            const btn = document.getElementById('wallet-btn');
+            const resultEl = document.getElementById('wallet-result');
+            const errorEl = document.getElementById('wallet-error');
+
+            errorEl.classList.remove('visible');
+            resultEl.classList.remove('visible');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Funding wallet...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/v1/generate-test-wallet`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ detail: 'Request failed' }));
+                    throw new Error(err.detail || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                document.getElementById('wallet-address').textContent = data.address || data.classic_address;
+                document.getElementById('wallet-seed').textContent = data.seed;
+                document.getElementById('wallet-balance').textContent = (data.balance || '100') + ' XRP';
+                resultEl.classList.add('visible');
+            } catch (err) {
+                showError('wallet-error', err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Test Wallet';
+            }
+        }
+    </script>
+</body>
+</html>

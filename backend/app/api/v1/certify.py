@@ -1,5 +1,7 @@
 import hashlib
+import hmac
 import json
+import os
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -16,6 +18,8 @@ from xrpl.wallet import Wallet
 
 from app.core.config import settings
 from app.core.quantum_shield import generate_shield, verify_shield, certificate_to_dict
+
+_SHIELD_SECRET_BYTES = os.environ.get("QUANTUM_SHIELD_SECRET", "dev-salt").encode()
 
 logger = structlog.get_logger()
 router = APIRouter()
@@ -106,7 +110,11 @@ async def certify(req: CertifyRequest):
             "hash": content_hash,
             "algorithm": "sha256",
             "timestamp": ts,
-            "recipient_hash": hashlib.sha256(req.to.lower().strip().encode()).hexdigest()[:16],
+            "recipient_hash": hmac.new(
+                    _SHIELD_SECRET_BYTES,
+                    req.to.lower().strip().encode(),
+                    hashlib.sha256,
+                ).hexdigest()[:16],
         }
     )
 

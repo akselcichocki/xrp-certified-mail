@@ -4,6 +4,8 @@
 
 Certified mail for the internet age. Send an email, create a tamper-proof receipt on a public blockchain, and verify it forever — for less than a penny.
 
+**Scope:** This prototype certifies the SHA-256 hash of a message's recipient, subject, body, and timestamp. It does not currently handle attachments, MIME structure, cc/bcc, sender identity verification, or email headers. It is best described as a **message receipt proof** rather than full certified mail in the legal/postal sense.
+
 ## How It Works
 
 1. **Hash** — Email content (recipient, subject, body, timestamp) is hashed with SHA-256

@@ -46,17 +46,24 @@ from dataclasses import dataclass
 
 # Shield secret — used for HMAC binding. Must be set in production.
 _SHIELD_SECRET = os.environ.get("QUANTUM_SHIELD_SECRET", "")
+_ENVIRONMENT = os.environ.get("ENVIRONMENT", "dev").lower()
 
 if not _SHIELD_SECRET:
-    import warnings
-    warnings.warn(
-        "QUANTUM_SHIELD_SECRET is not set. Shield certificates will use an insecure default. "
-        "Set QUANTUM_SHIELD_SECRET to a long random value in production.",
-        stacklevel=2,
-    )
-    _SHIELD_SECRET = hashlib.sha256(
-        f"insecure-dev-default-{os.getpid()}".encode()
-    ).hexdigest()
+    if _ENVIRONMENT in ("prod", "production", "staging"):
+        raise RuntimeError(
+            "QUANTUM_SHIELD_SECRET is required in production. "
+            "Set it to a long random value (e.g. openssl rand -hex 32)."
+        )
+    else:
+        import warnings
+        _SHIELD_SECRET = hashlib.sha256(
+            f"dev-only-insecure-{os.getpid()}-{time.time()}".encode()
+        ).hexdigest()
+        warnings.warn(
+            "QUANTUM_SHIELD_SECRET not set — using insecure ephemeral default. "
+            "This is acceptable for local development only.",
+            stacklevel=2,
+        )
 
 
 @dataclass

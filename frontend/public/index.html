@@ -521,6 +521,36 @@
                             </span>
                         </div>
                     </div>
+
+                    <!-- Quantum Shield Certificate -->
+                    <div id="res-shield" style="display:none">
+                        <div class="card" style="margin-top:8px;border-color:rgba(34,197,94,.2);background:rgba(34,197,94,.02)">
+                            <div class="card-title" style="color:#22c55e">
+                                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.4);margin-right:8px"></span>
+                                Quantum Shield Certificate
+                            </div>
+                            <div style="font-size:10px;color:#52525b;margin-bottom:12px;line-height:1.6">This proof uses only hash-based cryptography (SHA-256 + HMAC). It does not depend on ECDSA and remains valid even if XRP transaction signatures are quantum-compromised.</div>
+                            <div class="result-row">
+                                <span class="result-label">Shield Hash</span>
+                                <span class="result-value">
+                                    <span id="shield-hash" style="color:#22c55e"></span>
+                                    <button class="btn-copy" onclick="copyText('shield-hash')">copy</button>
+                                </span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Nonce</span>
+                                <span class="result-value" id="shield-nonce"></span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Algorithm</span>
+                                <span class="result-value" id="shield-algo"></span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Quantum Safe</span>
+                                <span class="result-value" style="color:#22c55e">&#10003; Yes</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -810,11 +840,24 @@
                 }
 
                 const data = await res.json();
-                document.getElementById('res-tx-hash').textContent = data.transaction_hash;
-                document.getElementById('res-content-hash').textContent = data.content_hash;
-                document.getElementById('res-timestamp').textContent = data.timestamp || new Date().toISOString();
-                const explorerUrl = `https://testnet.xrpl.org/transactions/${data.transaction_hash}`;
+                const receipt = data.receipt || data;
+                const shield = data.quantum_shield || null;
+
+                document.getElementById('res-tx-hash').textContent = receipt.transaction_hash;
+                document.getElementById('res-content-hash').textContent = receipt.content_hash;
+                document.getElementById('res-timestamp').textContent = receipt.timestamp || new Date().toISOString();
+                const explorerUrl = receipt.explorer_url || `https://testnet.xrpl.org/transactions/${receipt.transaction_hash}`;
                 document.getElementById('res-explorer').href = explorerUrl;
+
+                // Show Quantum Shield if present
+                const shieldEl = document.getElementById('res-shield');
+                if (shield && shieldEl) {
+                    document.getElementById('shield-hash').textContent = shield.shield_hash;
+                    document.getElementById('shield-nonce').textContent = shield.nonce;
+                    document.getElementById('shield-algo').textContent = shield.algorithm;
+                    shieldEl.style.display = 'block';
+                }
+
                 resultEl.classList.add('visible');
             } catch (err) {
                 showError('certify-error', err.message);

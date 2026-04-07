@@ -15,6 +15,7 @@ from xrpl.transaction import submit_and_wait
 from xrpl.wallet import Wallet
 
 from app.core.config import settings
+from app.core.quantum_shield import generate_shield, verify_shield, certificate_to_dict
 
 logger = structlog.get_logger()
 router = APIRouter()
@@ -136,6 +137,14 @@ async def certify(req: CertifyRequest):
 
     logger.info("certify_success", tx_hash=tx_hash, ledger_index=ledger_index)
 
+    # Generate quantum-resistant shield certificate
+    shield = generate_shield(
+        content_hash=content_hash,
+        timestamp=ts,
+        xrp_tx_hash=tx_hash,
+    )
+    logger.info("quantum_shield_generated", shield_hash=shield.shield_hash[:16])
+
     return {
         "success": True,
         "receipt": {
@@ -147,6 +156,7 @@ async def certify(req: CertifyRequest):
             "fee": f"{fee} drops",
             "explorer_url": _explorer_url(tx_hash),
         },
+        "quantum_shield": certificate_to_dict(shield),
     }
 
 
@@ -207,6 +217,31 @@ async def verify(req: VerifyRequest):
             "validated": validated,
         },
         "explorer_url": _explorer_url(req.transaction_hash),
+    }
+
+
+class ShieldVerifyRequest(BaseModel):
+    content_hash: str
+    timestamp: str
+    nonce: str
+    shield_hash: str
+
+
+@router.post("/verify-shield")
+async def verify_quantum_shield(req: ShieldVerifyRequest):
+    """Verify a quantum shield certificate — no blockchain needed."""
+    is_valid = verify_shield(
+        content_hash=req.content_hash,
+        timestamp=req.timestamp,
+        nonce=req.nonce,
+        shield_hash=req.shield_hash,
+    )
+
+    return {
+        "verified": is_valid,
+        "quantum_resistant": True,
+        "algorithm": "sha256-hmac-chain",
+        "note": "This verification uses only hash-based cryptography. It does not depend on ECDSA and remains valid even if transaction signatures are quantum-compromised.",
     }
 
 

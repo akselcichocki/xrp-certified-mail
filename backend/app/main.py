@@ -28,14 +28,38 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
 )
 
-# CORS -- wide open for dev
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://certmail.akselcichocki.com",
+        "http://localhost:3000",
+        "http://localhost:3001",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Simple rate limiting
+from collections import defaultdict
+import time as _time
+
+_rate_limits = defaultdict(list)
+_RATE_LIMIT = 30  # requests per minute
+_RATE_WINDOW = 60  # seconds
+
+@app.middleware("http")
+async def rate_limit_middleware(request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    now = _time.time()
+    # Clean old entries
+    _rate_limits[client_ip] = [t for t in _rate_limits[client_ip] if now - t < _RATE_WINDOW]
+    if len(_rate_limits[client_ip]) >= _RATE_LIMIT:
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "Rate limit exceeded"}, status_code=429)
+    _rate_limits[client_ip].append(now)
+    return await call_next(request)
 
 # Routes
 app.include_router(health.router, prefix="/api/v1/health", tags=["health"])

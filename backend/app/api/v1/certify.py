@@ -90,7 +90,7 @@ class HashRequest(BaseModel):
 @router.post("/certify")
 async def certify(req: CertifyRequest):
     """Hash email content and write the proof to the XRP Ledger."""
-    ts = req.timestamp or datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(timezone.utc).isoformat()  # Server-authoritative — client timestamps ignored for certification
     content_hash = _compute_hash(req.to, req.subject, req.body, ts)
 
     if not settings.XRP_WALLET_SEED:
@@ -106,7 +106,7 @@ async def certify(req: CertifyRequest):
             "hash": content_hash,
             "algorithm": "sha256",
             "timestamp": ts,
-            "recipient": req.to,
+            "recipient_hash": hashlib.sha256(req.to.lower().strip().encode()).hexdigest()[:16],
         }
     )
 
@@ -203,20 +203,24 @@ async def verify(req: VerifyRequest):
 
     validated = result.get("validated", False)
 
+    tx_hash = req.transaction_hash
     return {
         "verified": True,
         "content_match": content_match,
+        "transaction_hash": tx_hash,
+        "content_hash": proof.get("hash"),
+        "timestamp": proof.get("timestamp"),
         "proof": {
             "hash": proof.get("hash"),
             "timestamp": proof.get("timestamp"),
-            "recipient": proof.get("recipient"),
+            "recipient": proof.get("recipient", proof.get("recipient_hash", "")),
         },
         "transaction": {
-            "hash": req.transaction_hash,
+            "hash": tx_hash,
             "ledger_index": result.get("ledger_index"),
             "validated": validated,
         },
-        "explorer_url": _explorer_url(req.transaction_hash),
+        "explorer_url": _explorer_url(tx_hash),
     }
 
 
@@ -256,6 +260,8 @@ async def hash_content(req: HashRequest):
 @router.post("/generate-test-wallet")
 async def generate_test_wallet():
     """Generate a funded testnet wallet for development."""
+    if settings.ENVIRONMENT not in ("dev", "development", "test"):
+        raise HTTPException(status_code=403, detail="Wallet generation disabled in production")
     if settings.XRP_NETWORK not in ("testnet", "devnet"):
         raise HTTPException(
             status_code=400,

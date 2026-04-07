@@ -44,12 +44,19 @@ import time
 from dataclasses import dataclass
 
 
-# Shield secret — used for HMAC binding. In production, this would be
-# a long-lived server secret. For now, generated on first run.
-_SHIELD_SECRET = os.environ.get(
-    "QUANTUM_SHIELD_SECRET",
-    hashlib.sha256(b"xrp-certmail-quantum-shield-v1").hexdigest()
-)
+# Shield secret — used for HMAC binding. Must be set in production.
+_SHIELD_SECRET = os.environ.get("QUANTUM_SHIELD_SECRET", "")
+
+if not _SHIELD_SECRET:
+    import warnings
+    warnings.warn(
+        "QUANTUM_SHIELD_SECRET is not set. Shield certificates will use an insecure default. "
+        "Set QUANTUM_SHIELD_SECRET to a long random value in production.",
+        stacklevel=2,
+    )
+    _SHIELD_SECRET = hashlib.sha256(
+        f"insecure-dev-default-{os.getpid()}".encode()
+    ).hexdigest()
 
 
 @dataclass

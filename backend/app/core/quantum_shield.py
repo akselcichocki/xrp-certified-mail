@@ -29,7 +29,7 @@ What it DOES do:
   - Records WHAT was sent (content hash — quantum safe)
   - Records the claimed certification time (timestamp in the hash chain)
   - Survives ECDSA compromise (no elliptic curve math involved)
-  - Creates a standalone verifiable certificate
+  - Creates a server-verifiable tamper-evident certificate
 
 This is a crypto-agility workaround: it adds a quantum-resistant layer
 alongside the classical proof, so the system degrades gracefully as

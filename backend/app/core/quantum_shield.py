@@ -15,10 +15,10 @@ How it works:
   1. Hash the email content (SHA-256) — same as the classical proof
   2. Build a hash chain: content_hash → chained with timestamp, nonce,
      and a server-side secret → produces a "shield hash"
-  3. The shield hash is deterministic and verifiable by anyone who has
-     the original content + the shield parameters
+  3. The shield hash is deterministic and verifiable by the certifying
+     server or any trusted party with access to the HMAC secret
   4. Even if the XRP transaction signature is forged, the shield
-     creates a server-side tamper-evident record of the content
+     provides a server-side tamper-evident record (not a trustless public proof)
 
 What this does NOT do:
   - It does not replace the XRP ledger proof (that still works today)
